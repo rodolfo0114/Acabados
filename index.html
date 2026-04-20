@@ -176,7 +176,7 @@
 // ══════════════════════════════════════════════════════
 // CONFIGURACIÓN — pegar URL del Apps Script deployment
 // ══════════════════════════════════════════════════════
-const API_URL = "https://script.google.com/macros/s/AKfycbyW6Rq03JQgS34_Ug4qjfDDdUGl42rhMeydfdBj8K4xaGdtterhxDXmenFQUQskY50/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxvCMSU2TqkWsR0FBo_Tbd18jnfWbFvR5nswxoej650qTdgF8o5YuqUAB4fhpxQ1S4/exec";
 
 const BASE_DATA = [
   { obs:16,  desc:"Contenedores sin señalización ni letrero de identificación.", grupo:"SEG", dificultad:"1", zona:"General", responsable:"Magaly / Mario", fecha:"", estado:"pendiente" },
@@ -293,10 +293,8 @@ async function saveRow(obs, fields) {
   if (API_URL === "PEGAR_URL_AQUI") return;
   setSyncStatus("saving", "Guardando...");
   try {
-    await fetch(API_URL, {
-      method:"POST",
-      body: JSON.stringify({ action:"update", obs, ...fields })
-    });
+    const params = new URLSearchParams({ action:"update", obs, ...fields });
+    await fetch(API_URL + "?" + params.toString());
     setSyncStatus("ok", "Guardado · " + new Date().toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"}));
   } catch(e) {
     setSyncStatus("error", "Error al guardar");
@@ -309,10 +307,8 @@ async function initData() {
   document.getElementById("loadingText").textContent = "Cargando datos iniciales...";
   document.getElementById("overlay").classList.remove("hidden");
   try {
-    await fetch(API_URL, {
-      method:"POST",
-      body: JSON.stringify({ action:"init", rows: BASE_DATA })
-    });
+    const params = new URLSearchParams({ action:"init", rows: JSON.stringify(BASE_DATA) });
+    await fetch(API_URL + "?" + params.toString());
     await loadFromSheet();
   } catch(e) {
     setSyncStatus("error", "Error al inicializar");
