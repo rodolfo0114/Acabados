@@ -7,375 +7,139 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0d0f14;
-    --surface: #141720;
-    --border: #1e2330;
-    --text: #e4e8f0;
-    --muted: #5a6178;
-    --accent: #4f9cf9;
-
-    /* grupos */
-    --seg: #f97316;
-    --arq: #a78bfa;
-    --iie: #34d399;
-    --iimm: #38bdf8;
-    --da: #f43f5e;
-    --doc: #fbbf24;
-    --mix: #e879f9;
-
-    /* dificultad */
-    --d1: #22c55e;
-    --d2: #eab308;
-    --d3: #ef4444;
+    --bg: #0d0f14; --surface: #141720; --border: #1e2330;
+    --text: #e4e8f0; --muted: #5a6178; --accent: #4f9cf9;
+    --seg: #f97316; --arq: #a78bfa; --iie: #34d399;
+    --iimm: #38bdf8; --da: #f43f5e; --doc: #fbbf24;
+    --d1: #22c55e; --d2: #eab308; --d3: #ef4444;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; min-height: 100vh; padding: 32px 24px; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 13px;
-    min-height: 100vh;
-    padding: 32px 24px;
-  }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 28px; }
+  header .label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+  header h1 { font-size: 22px; font-weight: 700; color: #fff; }
+  header p { color: var(--muted); font-size: 12px; margin-top: 4px; }
 
-  header {
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 20px;
-    margin-bottom: 28px;
-  }
+  .top-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .sync-status { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+  .sync-dot.ok { background: var(--d1); }
+  .sync-dot.saving { background: var(--d2); animation: pulse 1s infinite; }
+  .sync-dot.error { background: var(--d3); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-  header .label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 6px;
-  }
+  .btn-init { background: var(--accent); color: #fff; border: none; border-radius: 4px; padding: 5px 14px; font-size: 11px; font-family: 'IBM Plex Mono', monospace; cursor: pointer; }
+  .btn-init:hover { opacity: .85; }
 
-  header h1 {
-    font-size: 22px;
-    font-weight: 700;
-    color: #fff;
-  }
+  .stats { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 28px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px 18px; min-width: 110px; }
+  .stat-card .val { font-size: 26px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; line-height: 1; }
+  .stat-card .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px; }
 
-  header p {
-    color: var(--muted);
-    font-size: 12px;
-    margin-top: 4px;
-  }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+  .filter-label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-right: 4px; }
+  .btn-filter { background: var(--surface); border: 1px solid var(--border); color: var(--muted); border-radius: 4px; padding: 4px 12px; font-size: 11px; font-family: 'IBM Plex Mono', monospace; cursor: pointer; transition: all .15s; }
+  .btn-filter:hover, .btn-filter.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-  /* STATS */
-  .stats {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 28px;
-  }
-
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 12px 18px;
-    min-width: 120px;
-  }
-
-  .stat-card .val {
-    font-size: 26px;
-    font-weight: 700;
-    font-family: 'IBM Plex Mono', monospace;
-    line-height: 1;
-  }
-
-  .stat-card .lbl {
-    font-size: 10px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-top: 4px;
-  }
-
-  /* FILTROS */
-  .filters {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-    align-items: center;
-  }
-
-  .filter-label {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: var(--muted);
-    margin-right: 4px;
-  }
-
-  .btn-filter {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    border-radius: 4px;
-    padding: 4px 12px;
-    font-size: 11px;
-    font-family: 'IBM Plex Mono', monospace;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-
-  .btn-filter:hover, .btn-filter.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-  }
-
-  /* TABLA */
-  .table-wrap {
-    overflow-x: auto;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 900px;
-  }
-
-  thead tr {
-    background: #1a1e2e;
-    border-bottom: 2px solid var(--border);
-  }
-
-  th {
-    padding: 10px 14px;
-    text-align: left;
-    font-size: 9px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-    font-weight: 600;
-    white-space: nowrap;
-    cursor: pointer;
-    user-select: none;
-  }
-
-  th:hover { color: var(--text); }
-  th.sorted { color: var(--accent); }
-
-  tbody tr {
-    border-bottom: 1px solid var(--border);
-    transition: background 0.1s;
-  }
-
-  tbody tr:hover { background: rgba(79,156,249,0.04); }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+  table { width: 100%; border-collapse: collapse; min-width: 900px; }
+  thead tr { background: #1a1e2e; border-bottom: 2px solid var(--border); }
+  th { padding: 10px 14px; text-align: left; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); font-weight: 600; white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+  tbody tr:hover { background: rgba(79,156,249,.04); }
   tbody tr:last-child { border-bottom: none; }
   tbody tr.hidden { display: none; }
+  td { padding: 9px 14px; vertical-align: middle; line-height: 1.45; }
 
-  td {
-    padding: 9px 14px;
-    vertical-align: top;
-    line-height: 1.45;
-  }
+  .nc-num { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .nc-desc { color: var(--text); max-width: 340px; font-size: 12px; }
 
-  .nc-num {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    white-space: nowrap;
-  }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; font-family: 'IBM Plex Mono', monospace; font-weight: 600; white-space: nowrap; }
+  .grupo-SEG  { background: rgba(249,115,22,.15); color: var(--seg); }
+  .grupo-ARQ  { background: rgba(167,139,250,.15); color: var(--arq); }
+  .grupo-IIE  { background: rgba(52,211,153,.15);  color: var(--iie); }
+  .grupo-IIMM { background: rgba(56,189,248,.15);  color: var(--iimm); }
+  .grupo-DA   { background: rgba(244,63,94,.15);   color: var(--da); }
+  .grupo-DOC  { background: rgba(251,191,36,.15);  color: var(--doc); }
 
-  .nc-desc {
-    color: var(--text);
-    max-width: 360px;
-  }
-
-  .tag {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 3px;
-    font-size: 10px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-
-  .grupo-SEG    { background: rgba(249,115,22,.15); color: var(--seg); }
-  .grupo-ARQ    { background: rgba(167,139,250,.15); color: var(--arq); }
-  .grupo-IIE    { background: rgba(52,211,153,.15); color: var(--iie); }
-  .grupo-IIMM   { background: rgba(56,189,248,.15); color: var(--iimm); }
-  .grupo-DA     { background: rgba(244,63,94,.15); color: var(--da); }
-  .grupo-DOC    { background: rgba(251,191,36,.15); color: var(--doc); }
-  .grupo-MIX    { background: rgba(232,121,249,.15); color: var(--mix); }
-
-  .dif-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 10px;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-
-  .dif-1 { background: rgba(34,197,94,.12); color: var(--d1); border: 1px solid rgba(34,197,94,.25); }
-  .dif-2 { background: rgba(234,179,8,.12);  color: var(--d2); border: 1px solid rgba(234,179,8,.25); }
-  .dif-3 { background: rgba(239,68,68,.12);  color: var(--d3); border: 1px solid rgba(239,68,68,.25); }
-
-  .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: inline-block; }
-
-  /* Selectores y inputs editables */
-  .editable-select {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 4px;
-    padding: 3px 6px;
-    font-size: 11px;
-    font-family: 'IBM Plex Sans', sans-serif;
-    cursor: pointer;
-    outline: none;
-    min-width: 120px;
-  }
+  .editable-select { background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 4px; padding: 3px 6px; font-size: 11px; font-family: 'IBM Plex Sans', sans-serif; cursor: pointer; outline: none; min-width: 120px; }
   .editable-select option { background: var(--bg); }
-
-  /* Dificultad colores */
   .dif-sel-1 { border-color: var(--d1); color: var(--d1); }
   .dif-sel-2 { border-color: var(--d2); color: var(--d2); }
   .dif-sel-3 { border-color: var(--d3); color: var(--d3); }
-
-  /* Estado colores */
   .editable-select.pendiente  { border-color: #ef4444; color: #ef4444; }
   .editable-select.en-proceso { border-color: #eab308; color: #eab308; }
   .editable-select.levantado  { border-color: #22c55e; color: #22c55e; }
 
-  /* Responsable */
-  .editable-input {
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    color: var(--muted);
-    font-size: 11px;
-    font-family: 'IBM Plex Mono', monospace;
-    padding: 3px 6px;
-    width: 100%;
-    min-width: 110px;
-    outline: none;
-    transition: border-color 0.15s, background 0.15s;
-  }
+  .editable-input { background: transparent; border: 1px solid transparent; border-radius: 4px; color: var(--muted); font-size: 11px; font-family: 'IBM Plex Mono', monospace; padding: 3px 6px; width: 100%; min-width: 110px; outline: none; transition: border-color .15s, background .15s; }
   .editable-input:hover { border-color: var(--border); background: var(--surface); }
   .editable-input:focus { border-color: var(--accent); background: var(--surface); color: var(--text); }
 
-  /* Fecha */
-  .date-input {
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    color: var(--muted);
-    font-size: 11px;
-    font-family: 'IBM Plex Mono', monospace;
-    padding: 3px 6px;
-    width: 110px;
-    outline: none;
-    transition: border-color 0.15s, background 0.15s;
-    color-scheme: dark;
-  }
+  .date-input { background: transparent; border: 1px solid transparent; border-radius: 4px; color: var(--muted); font-size: 11px; font-family: 'IBM Plex Mono', monospace; padding: 3px 6px; width: 130px; outline: none; transition: border-color .15s; color-scheme: dark; }
   .date-input:hover { border-color: var(--border); background: var(--surface); }
   .date-input:focus { border-color: var(--accent); background: var(--surface); color: var(--text); }
   .date-input.vencida { color: var(--d3); border-color: rgba(239,68,68,.4); }
   .date-input.proxima { color: var(--d2); }
+  .date-input::-webkit-calendar-picker-indicator { filter: invert(.6); cursor: pointer; }
 
-  .date-input::-webkit-calendar-picker-indicator { filter: invert(0.6); cursor: pointer; }
+  .piso-tag { font-size: 10px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; white-space: nowrap; }
 
-  .piso-tag {
-    font-size: 10px;
-    color: var(--muted);
-    font-family: 'IBM Plex Mono', monospace;
-    white-space: nowrap;
-  }
-
-  /* Legend */
-  .legend {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin-top: 20px;
-    padding: 14px 18px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    font-size: 11px;
-  }
-
-  .legend-group { display: flex; align-items: center; gap: 6px; }
-
-  /* Resumen por grupo */
-  .group-summary {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 10px;
-    margin-bottom: 24px;
-  }
-
-  .gs-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 10px 14px;
-    border-left: 3px solid;
-    cursor: pointer;
-    transition: opacity 0.15s;
-  }
-
-  .gs-card:hover { opacity: 0.8; }
-  .gs-card.active-filter { outline: 1px solid var(--accent); }
-
+  .section-title { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 12px; font-family: 'IBM Plex Mono', monospace; }
+  .group-summary { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 10px; margin-bottom: 24px; }
+  .gs-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; border-left: 3px solid; cursor: pointer; transition: opacity .15s; }
+  .gs-card:hover { opacity: .8; }
   .gs-card .gs-name { font-size: 11px; font-weight: 600; margin-bottom: 2px; }
   .gs-card .gs-count { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 700; }
   .gs-card .gs-label { font-size: 10px; color: var(--muted); }
 
-  .section-title {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: var(--muted);
-    margin-bottom: 12px;
-    font-family: 'IBM Plex Mono', monospace;
-  }
+  .legend { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px; padding: 14px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; font-size: 11px; }
+  .legend-group { display: flex; align-items: center; gap: 6px; }
+  .dif-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; }
+  .dif-1 { background: rgba(34,197,94,.12); color: var(--d1); border: 1px solid rgba(34,197,94,.25); }
+  .dif-2 { background: rgba(234,179,8,.12);  color: var(--d2); border: 1px solid rgba(234,179,8,.25); }
+  .dif-3 { background: rgba(239,68,68,.12);  color: var(--d3); border: 1px solid rgba(239,68,68,.25); }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: inline-block; }
 
-  @media (max-width: 600px) {
-    body { padding: 16px 12px; }
-    header h1 { font-size: 17px; }
-  }
+  .loading-overlay { position: fixed; inset: 0; background: rgba(13,15,20,.9); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; z-index: 100; }
+  .loading-overlay.hidden { display: none; }
+  .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); }
 </style>
 </head>
 <body>
 
+<div class="loading-overlay" id="overlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Cargando datos...</div>
+</div>
+
 <header>
   <div class="label">Padova — Control de Calidad</div>
   <h1>No Conformidades · Litoral 900</h1>
-  <p>45 observaciones pendientes de levantamiento · Fuente: Evaluación de Obra</p>
+  <p>Seguimiento en tiempo real · Google Sheets</p>
 </header>
 
-<!-- STATS GLOBALES -->
-<div class="stats" id="stats">
-  <div class="stat-card"><div class="val" style="color:var(--d1)">0</div><div class="lbl">Fácil rápido</div></div>
-  <div class="stat-card"><div class="val" style="color:var(--d2)">0</div><div class="lbl">Fácil largo</div></div>
-  <div class="stat-card"><div class="val" style="color:var(--d3)">0</div><div class="lbl">Difícil</div></div>
-  <div class="stat-card"><div class="val" style="color:var(--doc)">0</div><div class="lbl">Documentación</div></div>
-  <div class="stat-card"><div class="val" style="color:var(--accent)">0</div><div class="lbl">Levantadas</div></div>
+<div class="top-bar">
+  <div class="sync-status">
+    <div class="sync-dot" id="syncDot"></div>
+    <span id="syncText">Conectando...</span>
+  </div>
+  <button class="btn-init" onclick="initData()">⬆ Cargar datos iniciales</button>
 </div>
 
-<!-- RESUMEN POR GRUPO -->
+<div class="stats">
+  <div class="stat-card"><div class="val" style="color:var(--d1)" id="s1">—</div><div class="lbl">Fácil rápido</div></div>
+  <div class="stat-card"><div class="val" style="color:var(--d2)" id="s2">—</div><div class="lbl">Fácil largo</div></div>
+  <div class="stat-card"><div class="val" style="color:var(--d3)" id="s3">—</div><div class="lbl">Difícil</div></div>
+  <div class="stat-card"><div class="val" style="color:var(--doc)" id="s4">—</div><div class="lbl">Documentación</div></div>
+  <div class="stat-card"><div class="val" style="color:var(--accent)" id="s5">—</div><div class="lbl">Levantadas</div></div>
+</div>
+
 <div class="section-title">Grupos de problema</div>
 <div class="group-summary" id="groupSummary"></div>
 
-<!-- FILTROS -->
 <div class="filters">
   <span class="filter-label">Filtrar:</span>
   <button class="btn-filter active" data-filter="all">Todos</button>
@@ -390,243 +154,222 @@
   <button class="btn-filter" data-filter="dif-3">● Difícil</button>
 </div>
 
-<!-- TABLA -->
 <div class="table-wrap">
-<table id="ncTable">
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Obs.</th>
-      <th>Descripción</th>
-      <th>Grupo</th>
-      <th>Dificultad</th>
-      <th>Piso / Zona</th>
-      <th>Responsable</th>
-      <th>Fecha estimada</th>
-      <th>Estado</th>
-    </tr>
-  </thead>
+<table>
+  <thead><tr>
+    <th>#</th><th>Obs.</th><th>Descripción</th><th>Grupo</th>
+    <th>Dificultad</th><th>Piso / Zona</th><th>Responsable</th>
+    <th>Fecha estimada</th><th>Estado</th>
+  </tr></thead>
   <tbody id="tbody"></tbody>
 </table>
 </div>
 
 <div class="legend">
   <strong style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)">Dificultad:</strong>
-  <div class="legend-group"><span class="dif-badge dif-1"><span class="dot"></span>1 — Fácil y rápido</span> <span style="color:var(--muted);font-size:10px">Acción puntual, &lt;1 semana</span></div>
-  <div class="legend-group"><span class="dif-badge dif-2"><span class="dot"></span>2 — Fácil pero largo</span> <span style="color:var(--muted);font-size:10px">Sin complejidad técnica, requiere gestión o tiempo</span></div>
-  <div class="legend-group"><span class="dif-badge dif-3"><span class="dot"></span>3 — Difícil y solucionable</span> <span style="color:var(--muted);font-size:10px">Requiere especialista, prueba o rediseño</span></div>
+  <div class="legend-group"><span class="dif-badge dif-1"><span class="dot"></span>1 — Fácil y rápido</span><span style="color:var(--muted);font-size:10px">Acción puntual, &lt;1 semana</span></div>
+  <div class="legend-group"><span class="dif-badge dif-2"><span class="dot"></span>2 — Fácil pero largo</span><span style="color:var(--muted);font-size:10px">Sin complejidad técnica, requiere gestión</span></div>
+  <div class="legend-group"><span class="dif-badge dif-3"><span class="dot"></span>3 — Difícil y solucionable</span><span style="color:var(--muted);font-size:10px">Requiere especialista o rediseño</span></div>
 </div>
 
 <script>
-const DATA = [
-  // ─── SEGURIDAD ────────────────────────────────────────────────────
-  { n:1,  obs:16,  desc:"Contenedores sin señalización ni letrero de identificación.", grupo:"SEG", dif:1, zona:"General", resp:"Magaly / Mario" },
-  { n:5,  obs:34,  desc:"Faltan extintores en locales comerciales.", grupo:"SEG", dif:1, zona:"Piso 1 / LC", resp:"Magaly / Mario" },
-  { n:6,  obs:35,  desc:"Extintores en techo expuestos; colocar protección.", grupo:"SEG", dif:1, zona:"Techo/Azotea", resp:"Pamela" },
-  { n:31, obs:96,  desc:"No se ha instalado banda señalizadora en vidrios y mamparas de ingreso y áreas comunes.", grupo:"SEG", dif:1, zona:"Áreas comunes", resp:"Magaly / Mario" },
-  { n:4,  obs:33,  desc:"Faltan señales en est. preferencial, bicicletas, gabinetes eléctricos y tableros en dptos. (S1, P1, LC).", grupo:"SEG", dif:2, zona:"S1 / P1 / LC / Dptos.", resp:"Magaly / Mario" },
-  { n:3,  obs:32,  desc:"Falta luz estroboscópica en baños para discapacitados en locales comerciales.", grupo:"SEG", dif:2, zona:"Piso 1 / LC", resp:"Pamela — CAV TELECOM / HORNA" },
+// ══════════════════════════════════════════════════════
+// CONFIGURACIÓN — pegar URL del Apps Script deployment
+// ══════════════════════════════════════════════════════
+const API_URL = "https://script.google.com/macros/s/AKfycbyW6Rq03JQgS34_Ug4qjfDDdUGl42rhMeydfdBj8K4xaGdtterhxDXmenFQUQskY50/exec";
 
-  // ─── ARQ COMPATIBILIZACIONES ─────────────────────────────────────
-  { n:19, obs:76,  desc:"Compatibilizar ubicación de tableros eléctricos.", grupo:"ARQ", dif:2, zona:"Piso 2", resp:"Pame / JM" },
-  { n:20, obs:77,  desc:"Compatibilizar ubicación de lavamopas.", grupo:"ARQ", dif:1, zona:"Piso 2", resp:"Pame / JM" },
-  { n:21, obs:78,  desc:"Compatibilizar ubicación de escalera de gato y rejilla hacia cisterna ACI.", grupo:"ARQ", dif:2, zona:"Sótano", resp:"Pame / JM" },
-  { n:22, obs:80,  desc:"Compatibilizar ubicación de tableros eléctricos.", grupo:"ARQ", dif:2, zona:"Piso 3", resp:"Pame / JM" },
-  { n:23, obs:82,  desc:"Compatibilizar ubicación de tableros eléctricos.", grupo:"ARQ", dif:2, zona:"Piso 4", resp:"Pame / JM" },
-  { n:24, obs:84,  desc:"Compatibilizar ubicación de tableros eléctricos.", grupo:"ARQ", dif:2, zona:"Piso 5", resp:"Pame / JM" },
-  { n:25, obs:86,  desc:"Compatibilizar ubicación de tableros eléctricos.", grupo:"ARQ", dif:2, zona:"Piso 6", resp:"Pame / JM" },
-  { n:26, obs:88,  desc:"Compatibilizar ubicación de tableros eléctricos.", grupo:"ARQ", dif:2, zona:"Piso 7", resp:"Pame / JM" },
-  { n:27, obs:89,  desc:"Compatibilizar ubicación de lavaderos en zona de mascotas.", grupo:"ARQ", dif:1, zona:"Áreas comunes", resp:"Pame / JM" },
-  { n:28, obs:90,  desc:"Compatibilizar ubicación de terma eléctrica en zona de mascotas.", grupo:"ARQ", dif:2, zona:"Áreas comunes", resp:"Pame / JM" },
-  { n:29, obs:93,  desc:"Compatibilizar ubicación de tableros eléctricos.", grupo:"ARQ", dif:2, zona:"Piso 8", resp:"JM" },
-  { n:32, obs:98,  desc:"Compatibilizar ubicación de tableros eléctricos en locales comerciales.", grupo:"ARQ", dif:2, zona:"Piso 1 / LC", resp:"Pame / JM" },
-  { n:34, obs:100, desc:"Compatibilizar nivel de piso en local comercial 1; verificar escalones en puerta conforme planos.", grupo:"ARQ", dif:3, zona:"Piso 1 / LC", resp:"Pame / JM" },
-  { n:35, obs:102, desc:"Compatibilizar ubicación de lavandería (Dpto. 200).", grupo:"ARQ", dif:2, zona:"Piso 2", resp:"Pame / JM" },
-  { n:36, obs:103, desc:"Compatibilizar ubicación de rejilla de ventilación permanente en mampara de sala (Dpto. 200).", grupo:"ARQ", dif:2, zona:"Piso 2", resp:"Pame / JM" },
-  { n:37, obs:104, desc:"Compatibilizar numeración de departamentos 200 y 208.", grupo:"ARQ", dif:1, zona:"Piso 2", resp:"Pame" },
-  { n:38, obs:110, desc:"Compatibilizar ubicación de extractores (Dptos. 1505 y 1506).", grupo:"ARQ", dif:2, zona:"Piso 15", resp:"Pame / JM" },
-  { n:39, obs:116, desc:"Compatibilizar ubicación de tableros eléctricos en gimnasio.", grupo:"ARQ", dif:2, zona:"Azotea", resp:"Pame / JM" },
-  { n:40, obs:117, desc:"Compatibilizar ubicación de jardinera al costado de depósito.", grupo:"ARQ", dif:1, zona:"Azotea", resp:"Pame / JM" },
-  { n:41, obs:118, desc:"Compatibilizar ubicación de tragaluz en SH Mujeres.", grupo:"ARQ", dif:2, zona:"Azotea", resp:"Pame / JM" },
-  { n:42, obs:119, desc:"Compatibilizar ubicación de extractores en SH Hombres.", grupo:"ARQ", dif:2, zona:"Azotea", resp:"Pame / JM" },
-  { n:43, obs:122, desc:"Compatibilizar ubicación de tableros eléctricos.", grupo:"ARQ", dif:2, zona:"Azotea", resp:"Pame / JM" },
-  { n:9,  obs:45,  desc:"Compatibilizar ubicación de paneles fotovoltaicos.", grupo:"ARQ", dif:2, zona:"Azotea", resp:"Pamela / JM" },
-  { n:44, obs:123, desc:"Compatibilizar ubicación de paneles fotovoltaicos.", grupo:"ARQ", dif:2, zona:"Azotea", resp:"Pame / JM" },
-  { n:30, obs:94,  desc:"Falta concluir acabados en depósito 02.", grupo:"ARQ", dif:2, zona:"Sótano", resp:"Pamela — CAV TELECOM" },
-
-  // ─── ELÉCTRICAS ──────────────────────────────────────────────────
-  { n:7,  obs:43,  desc:"Circuitos en T-S2, T-SG2, T-SG, T-AZ, T-SUM, T-GYM y T-REC no coinciden con proyecto aprobado.", grupo:"IIE", dif:3, zona:"Varios", resp:"Pamela / JM — HORNA" },
-  { n:8,  obs:44,  desc:"TD del dpto. 203 sin tapa, sin mandiles, sin rótulos y sin leyenda.", grupo:"IIE", dif:1, zona:"Piso 2", resp:"Pamela / Mario" },
-  { n:10, obs:47,  desc:"Falta luminaria en escalera de emergencia entre sótano 05 y 06.", grupo:"IIE", dif:1, zona:"S5–S6", resp:"Pamela" },
-  { n:11, obs:48,  desc:"Terma eléctrica instalada en zona de mascotas difiere del proyecto aprobado.", grupo:"IIE", dif:3, zona:"Áreas comunes", resp:"Pamela / JM — HORNA" },
-
-  // ─── MECÁNICAS / VENTILACIÓN ─────────────────────────────────────
-  { n:12, obs:50,  desc:"Falta sistema de ventilación mecánica en locales comerciales según planos aprobados.", grupo:"IIMM", dif:3, zona:"Piso 1 / LC", resp:"Pamela — ASPIRATEK" },
-  { n:13, obs:52,  desc:"Extractores inoperativos en baños del dpto. 1100.", grupo:"IIMM", dif:2, zona:"Piso 11", resp:"Pamela" },
-  { n:33, obs:99,  desc:"Sin sistema de ventilación (rejilla y ductos) en locales comerciales; difiere de planos.", grupo:"IIMM", dif:3, zona:"Piso 1 / LC", resp:"Pame / JM — ASPIRATEK" },
-
-  // ─── DETECCIÓN & ALARMA ──────────────────────────────────────────
-  { n:14, obs:53,  desc:"No se realizó prueba de interconexión entre detección de incendios y extracción de monóxido/inyección de aire.", grupo:"DA", dif:3, zona:"General", resp:"Pamela / JM — CAV TELECOM" },
-  { n:15, obs:54,  desc:"No se verificó operatividad del sistema de inyección de aire y extracción de humo en vestíbulos previos.", grupo:"DA", dif:3, zona:"General", resp:"Pamela / JM — CAV TELECOM" },
-  { n:16, obs:55,  desc:"No se realizó prueba de interconexión del sistema con detección de incendios y ascensores.", grupo:"DA", dif:3, zona:"General", resp:"Pamela / JM — CAV TELECOM" },
-  { n:17, obs:72,  desc:"Locales comerciales sin equipos de detección indicados en proyecto aprobado.", grupo:"DA", dif:3, zona:"Piso 1 / LC", resp:"Pamela / JM — CAV TELECOM" },
-  { n:18, obs:74,  desc:"Falta retirar protección de detectores de humo en S6, S5, S4, cuarto de basura LC1 y cuarto de medidores.", grupo:"DA", dif:1, zona:"S4/S5/S6 / P1", resp:"Pamela — CAV TELECOM" },
-
-  // ─── DOCUMENTACIÓN / CERTIFICADOS ────────────────────────────────
-  { n:45, obs:124, desc:"Certificado de garantía de instalaciones eléctricas.", grupo:"DOC", dif:2, zona:"Dossier", resp:"Mario / Pame" },
-  { n:45, obs:125, desc:"Certificado de garantía de instalaciones sanitarias.", grupo:"DOC", dif:2, zona:"Dossier", resp:"JM / Francisco" },
-  { n:45, obs:126, desc:"Certificado de conformidad SEDAPAL (agua y alcantarillado).", grupo:"DOC", dif:2, zona:"Dossier", resp:"JM / Francisco" },
-  { n:45, obs:127, desc:"Certificado de garantía de planta de tratamiento de aguas residuales.", grupo:"DOC", dif:2, zona:"Dossier", resp:"—" },
-  { n:45, obs:128, desc:"Certificado de garantía de sistema ACI.", grupo:"DOC", dif:2, zona:"Dossier", resp:"—" },
-  { n:45, obs:129, desc:"Certificado de garantía de sistema de detección de incendios.", grupo:"DOC", dif:2, zona:"Dossier", resp:"—" },
-  { n:45, obs:130, desc:"Certificado de garantía de extracción de baños (incl. dampers cortahumos).", grupo:"DOC", dif:2, zona:"Dossier", resp:"—" },
-  { n:45, obs:131, desc:"Certificado de garantía de sistema de extracción de monóxido.", grupo:"DOC", dif:2, zona:"Dossier", resp:"—" },
-  { n:45, obs:132, desc:"Certificado de garantía de inyección de aire en cuarto de bombas.", grupo:"DOC", dif:2, zona:"Dossier", resp:"—" },
-  { n:45, obs:133, desc:"Certificado de garantía y protocolos de pozos a tierra.", grupo:"DOC", dif:2, zona:"Dossier", resp:"—" },
-  { n:45, obs:134, desc:"Certificado de garantía de puertas cortafuego y accesorios (con relación por ambiente).", grupo:"DOC", dif:2, zona:"Dossier", resp:"—" },
-  { n:45, obs:135, desc:"Certificado de garantía de luces de emergencia.", grupo:"DOC", dif:2, zona:"Dossier", resp:"—" },
-  { n:45, obs:136, desc:"Certificado de garantía de extintores.", grupo:"DOC", dif:2, zona:"Dossier", resp:"—" },
-  { n:45, obs:137, desc:"Certificado de garantía y operatividad de ascensor de pasajeros.", grupo:"DOC", dif:2, zona:"Dossier", resp:"—" },
-  { n:45, obs:138, desc:"Certificado de garantía y operatividad de elevador.", grupo:"DOC", dif:2, zona:"Dossier", resp:"—" },
-  { n:45, obs:139, desc:"Certificado de garantía y operatividad de grupo electrógeno.", grupo:"DOC", dif:2, zona:"Dossier", resp:"—" },
-  { n:45, obs:140, desc:"Certificado de garantía de instalaciones de gas.", grupo:"DOC", dif:2, zona:"Dossier", resp:"—" },
-  { n:45, obs:141, desc:"Certificado de garantía de planchas drywall cortafuego (pases, cuartos eléctricos, basura, etc.).", grupo:"DOC", dif:2, zona:"Dossier", resp:"—" },
-  { n:45, obs:142, desc:"Certificado de garantía de sellos cortafuego en espacios compartimentados.", grupo:"DOC", dif:2, zona:"Dossier", resp:"—" },
-  { n:45, obs:143, desc:"Certificado de garantía de impermeabilización de áreas verdes y sumergidas.", grupo:"DOC", dif:2, zona:"Dossier", resp:"—" },
-  { n:45, obs:144, desc:"Certificado de garantía y operatividad de paneles fotovoltaicos.", grupo:"DOC", dif:2, zona:"Dossier", resp:"—" },
-  { n:45, obs:145, desc:"Certificado de garantía de cristales templados.", grupo:"DOC", dif:2, zona:"Dossier", resp:"—" },
-  // NC 2 paisajismo
-  { n:2, obs:24, desc:"Plantones en Calle 8 de octubre (5°–9° árbol) con observaciones; cambiar los que no estén en buen estado.", grupo:"ARQ", dif:2, zona:"Retiro municipal", resp:"Pamela Montes" },
+const BASE_DATA = [
+  { obs:16,  desc:"Contenedores sin señalización ni letrero de identificación.", grupo:"SEG", dificultad:"1", zona:"General", responsable:"Magaly / Mario", fecha:"", estado:"pendiente" },
+  { obs:24,  desc:"Plantones en Calle 8 de octubre (5°–9° árbol); cambiar los que no estén en buen estado.", grupo:"ARQ", dificultad:"2", zona:"Retiro municipal", responsable:"Pamela Montes", fecha:"", estado:"pendiente" },
+  { obs:32,  desc:"Falta luz estroboscópica en baños para discapacitados en locales comerciales.", grupo:"SEG", dificultad:"2", zona:"Piso 1 / LC", responsable:"Pamela — CAV TELECOM / HORNA", fecha:"", estado:"pendiente" },
+  { obs:33,  desc:"Faltan señales en est. preferencial, bicicletas, gabinetes eléctricos y tableros en dptos.", grupo:"SEG", dificultad:"2", zona:"S1 / P1 / LC / Dptos.", responsable:"Magaly / Mario", fecha:"", estado:"pendiente" },
+  { obs:34,  desc:"Faltan extintores en locales comerciales.", grupo:"SEG", dificultad:"1", zona:"Piso 1 / LC", responsable:"Magaly / Mario", fecha:"", estado:"pendiente" },
+  { obs:35,  desc:"Extintores en techo expuestos; colocar protección.", grupo:"SEG", dificultad:"1", zona:"Techo/Azotea", responsable:"Pamela", fecha:"", estado:"pendiente" },
+  { obs:43,  desc:"Circuitos en T-S2, T-SG2, T-SG, T-AZ, T-SUM, T-GYM y T-REC no coinciden con proyecto aprobado.", grupo:"IIE", dificultad:"3", zona:"Varios", responsable:"Pamela / JM — HORNA", fecha:"", estado:"pendiente" },
+  { obs:44,  desc:"TD del dpto. 203 sin tapa, sin mandiles, sin rótulos y sin leyenda.", grupo:"IIE", dificultad:"1", zona:"Piso 2", responsable:"Pamela / Mario", fecha:"", estado:"pendiente" },
+  { obs:45,  desc:"Compatibilizar ubicación de paneles fotovoltaicos.", grupo:"ARQ", dificultad:"2", zona:"Azotea", responsable:"Pamela / JM", fecha:"", estado:"pendiente" },
+  { obs:47,  desc:"Falta luminaria en escalera de emergencia entre sótano 05 y 06.", grupo:"IIE", dificultad:"1", zona:"S5–S6", responsable:"Pamela", fecha:"", estado:"pendiente" },
+  { obs:48,  desc:"Terma eléctrica instalada en zona de mascotas difiere del proyecto aprobado.", grupo:"IIE", dificultad:"3", zona:"Áreas comunes", responsable:"Pamela / JM — HORNA", fecha:"", estado:"pendiente" },
+  { obs:50,  desc:"Falta sistema de ventilación mecánica en locales comerciales según planos aprobados.", grupo:"IIMM", dificultad:"3", zona:"Piso 1 / LC", responsable:"Pamela — ASPIRATEK", fecha:"", estado:"pendiente" },
+  { obs:52,  desc:"Extractores inoperativos en baños del dpto. 1100.", grupo:"IIMM", dificultad:"2", zona:"Piso 11", responsable:"Pamela", fecha:"", estado:"pendiente" },
+  { obs:53,  desc:"No se realizó prueba de interconexión entre detección de incendios y extracción de monóxido.", grupo:"DA", dificultad:"3", zona:"General", responsable:"Pamela / JM — CAV TELECOM", fecha:"", estado:"pendiente" },
+  { obs:54,  desc:"No se verificó operatividad del sistema de inyección de aire y extracción de humo en vestíbulos.", grupo:"DA", dificultad:"3", zona:"General", responsable:"Pamela / JM — CAV TELECOM", fecha:"", estado:"pendiente" },
+  { obs:55,  desc:"No se realizó prueba de interconexión del sistema con detección de incendios y ascensores.", grupo:"DA", dificultad:"3", zona:"General", responsable:"Pamela / JM — CAV TELECOM", fecha:"", estado:"pendiente" },
+  { obs:72,  desc:"Locales comerciales sin equipos de detección indicados en proyecto aprobado.", grupo:"DA", dificultad:"3", zona:"Piso 1 / LC", responsable:"Pamela / JM — CAV TELECOM", fecha:"", estado:"pendiente" },
+  { obs:74,  desc:"Falta retirar protección de detectores de humo en S6, S5, S4, cuarto de basura y cuarto de medidores.", grupo:"DA", dificultad:"1", zona:"S4/S5/S6 / P1", responsable:"Pamela — CAV TELECOM", fecha:"", estado:"pendiente" },
+  { obs:76,  desc:"Compatibilizar ubicación de tableros eléctricos.", grupo:"ARQ", dificultad:"2", zona:"Piso 2", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:77,  desc:"Compatibilizar ubicación de lavamopas.", grupo:"ARQ", dificultad:"1", zona:"Piso 2", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:78,  desc:"Compatibilizar ubicación de escalera de gato y rejilla hacia cisterna ACI.", grupo:"ARQ", dificultad:"2", zona:"Sótano", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:80,  desc:"Compatibilizar ubicación de tableros eléctricos.", grupo:"ARQ", dificultad:"2", zona:"Piso 3", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:82,  desc:"Compatibilizar ubicación de tableros eléctricos.", grupo:"ARQ", dificultad:"2", zona:"Piso 4", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:84,  desc:"Compatibilizar ubicación de tableros eléctricos.", grupo:"ARQ", dificultad:"2", zona:"Piso 5", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:86,  desc:"Compatibilizar ubicación de tableros eléctricos.", grupo:"ARQ", dificultad:"2", zona:"Piso 6", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:88,  desc:"Compatibilizar ubicación de tableros eléctricos.", grupo:"ARQ", dificultad:"2", zona:"Piso 7", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:89,  desc:"Compatibilizar ubicación de lavaderos en zona de mascotas.", grupo:"ARQ", dificultad:"1", zona:"Áreas comunes", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:90,  desc:"Compatibilizar ubicación de terma eléctrica en zona de mascotas.", grupo:"ARQ", dificultad:"2", zona:"Áreas comunes", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:93,  desc:"Compatibilizar ubicación de tableros eléctricos.", grupo:"ARQ", dificultad:"2", zona:"Piso 8", responsable:"JM", fecha:"", estado:"pendiente" },
+  { obs:94,  desc:"Falta concluir acabados en depósito 02.", grupo:"ARQ", dificultad:"2", zona:"Sótano", responsable:"Pamela — CAV TELECOM", fecha:"", estado:"pendiente" },
+  { obs:96,  desc:"No se ha instalado banda señalizadora en vidrios y mamparas de ingreso y áreas comunes.", grupo:"SEG", dificultad:"1", zona:"Áreas comunes", responsable:"Magaly / Mario", fecha:"", estado:"pendiente" },
+  { obs:98,  desc:"Compatibilizar ubicación de tableros eléctricos en locales comerciales.", grupo:"ARQ", dificultad:"2", zona:"Piso 1 / LC", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:99,  desc:"Sin sistema de ventilación (rejilla y ductos) en locales comerciales; difiere de planos.", grupo:"IIMM", dificultad:"3", zona:"Piso 1 / LC", responsable:"Pame / JM — ASPIRATEK", fecha:"", estado:"pendiente" },
+  { obs:100, desc:"Compatibilizar nivel de piso en local comercial 1; verificar escalones en puerta conforme planos.", grupo:"ARQ", dificultad:"3", zona:"Piso 1 / LC", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:102, desc:"Compatibilizar ubicación de lavandería (Dpto. 200).", grupo:"ARQ", dificultad:"2", zona:"Piso 2", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:103, desc:"Compatibilizar ubicación de rejilla de ventilación permanente en mampara de sala (Dpto. 200).", grupo:"ARQ", dificultad:"2", zona:"Piso 2", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:104, desc:"Compatibilizar numeración de departamentos 200 y 208.", grupo:"ARQ", dificultad:"1", zona:"Piso 2", responsable:"Pame", fecha:"", estado:"pendiente" },
+  { obs:110, desc:"Compatibilizar ubicación de extractores (Dptos. 1505 y 1506).", grupo:"ARQ", dificultad:"2", zona:"Piso 15", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:116, desc:"Compatibilizar ubicación de tableros eléctricos en gimnasio.", grupo:"ARQ", dificultad:"2", zona:"Azotea", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:117, desc:"Compatibilizar ubicación de jardinera al costado de depósito.", grupo:"ARQ", dificultad:"1", zona:"Azotea", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:118, desc:"Compatibilizar ubicación de tragaluz en SH Mujeres.", grupo:"ARQ", dificultad:"2", zona:"Azotea", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:119, desc:"Compatibilizar ubicación de extractores en SH Hombres.", grupo:"ARQ", dificultad:"2", zona:"Azotea", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:122, desc:"Compatibilizar ubicación de tableros eléctricos.", grupo:"ARQ", dificultad:"2", zona:"Azotea", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:123, desc:"Compatibilizar ubicación de paneles fotovoltaicos.", grupo:"ARQ", dificultad:"2", zona:"Azotea", responsable:"Pame / JM", fecha:"", estado:"pendiente" },
+  { obs:124, desc:"Certificado de garantía de instalaciones eléctricas.", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"Mario / Pame", fecha:"", estado:"pendiente" },
+  { obs:125, desc:"Certificado de garantía de instalaciones sanitarias.", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"JM / Francisco", fecha:"", estado:"pendiente" },
+  { obs:126, desc:"Certificado de conformidad SEDAPAL (agua y alcantarillado).", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"JM / Francisco", fecha:"", estado:"pendiente" },
+  { obs:127, desc:"Certificado de garantía de planta de tratamiento de aguas residuales.", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"—", fecha:"", estado:"pendiente" },
+  { obs:128, desc:"Certificado de garantía de sistema ACI.", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"—", fecha:"", estado:"pendiente" },
+  { obs:129, desc:"Certificado de garantía de sistema de detección de incendios.", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"—", fecha:"", estado:"pendiente" },
+  { obs:130, desc:"Certificado de garantía de extracción de baños (incl. dampers cortahumos).", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"—", fecha:"", estado:"pendiente" },
+  { obs:131, desc:"Certificado de garantía de sistema de extracción de monóxido.", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"—", fecha:"", estado:"pendiente" },
+  { obs:132, desc:"Certificado de garantía de inyección de aire en cuarto de bombas.", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"—", fecha:"", estado:"pendiente" },
+  { obs:133, desc:"Certificado de garantía y protocolos de pozos a tierra.", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"—", fecha:"", estado:"pendiente" },
+  { obs:134, desc:"Certificado de garantía de puertas cortafuego y accesorios.", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"—", fecha:"", estado:"pendiente" },
+  { obs:135, desc:"Certificado de garantía de luces de emergencia.", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"—", fecha:"", estado:"pendiente" },
+  { obs:136, desc:"Certificado de garantía de extintores.", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"—", fecha:"", estado:"pendiente" },
+  { obs:137, desc:"Certificado de garantía y operatividad de ascensor de pasajeros.", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"—", fecha:"", estado:"pendiente" },
+  { obs:138, desc:"Certificado de garantía y operatividad de elevador.", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"—", fecha:"", estado:"pendiente" },
+  { obs:139, desc:"Certificado de garantía y operatividad de grupo electrógeno.", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"—", fecha:"", estado:"pendiente" },
+  { obs:140, desc:"Certificado de garantía de instalaciones de gas.", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"—", fecha:"", estado:"pendiente" },
+  { obs:141, desc:"Certificado de garantía de planchas drywall cortafuego.", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"—", fecha:"", estado:"pendiente" },
+  { obs:142, desc:"Certificado de garantía de sellos cortafuego en espacios compartimentados.", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"—", fecha:"", estado:"pendiente" },
+  { obs:143, desc:"Certificado de garantía de impermeabilización de áreas verdes y sumergidas.", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"—", fecha:"", estado:"pendiente" },
+  { obs:144, desc:"Certificado de garantía y operatividad de paneles fotovoltaicos.", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"—", fecha:"", estado:"pendiente" },
+  { obs:145, desc:"Certificado de garantía de cristales templados.", grupo:"DOC", dificultad:"2", zona:"Dossier", responsable:"—", fecha:"", estado:"pendiente" },
 ];
 
 const GRUPOS = {
-  SEG:  { label:"Seguridad", color:"var(--seg)" },
-  ARQ:  { label:"Compatibilizaciones ARQ", color:"var(--arq)" },
-  IIE:  { label:"Instalac. Eléctricas", color:"var(--iie)" },
-  IIMM: { label:"Instalac. Mecánicas", color:"var(--iimm)" },
-  DA:   { label:"Detección & Alarma", color:"var(--da)" },
-  DOC:  { label:"Documentación", color:"var(--doc)" },
+  SEG:  { label:"Seguridad",               color:"var(--seg)"  },
+  ARQ:  { label:"Compatibilizaciones ARQ", color:"var(--arq)"  },
+  IIE:  { label:"Instalac. Eléctricas",    color:"var(--iie)"  },
+  IIMM: { label:"Instalac. Mecánicas",     color:"var(--iimm)" },
+  DA:   { label:"Detección & Alarma",      color:"var(--da)"   },
+  DOC:  { label:"Documentación",           color:"var(--doc)"  },
 };
 
-const DIF = {
-  1: { label:"1 · Fácil rápido", cls:"dif-1" },
-  2: { label:"2 · Fácil largo",  cls:"dif-2" },
-  3: { label:"3 · Difícil",      cls:"dif-3" },
-};
+let ROWS = [];
+let saveTimer = null;
 
-// Estado, dificultad, responsable y fecha guardados en memoria
-const estados = {};
-const difs = {};
-const resps = {};
-const fechas = {};
-DATA.forEach((r,i) => {
-  estados[i] = "pendiente";
-  difs[i] = r.dif;
-  resps[i] = r.resp;
-  fechas[i] = "";
-});
+function setSyncStatus(state, text) {
+  document.getElementById("syncDot").className = "sync-dot " + state;
+  document.getElementById("syncText").textContent = text;
+}
+
+async function loadFromSheet() {
+  if (API_URL === "PEGAR_URL_AQUI") {
+    setSyncStatus("error", "Sin API — modo local (los cambios no se sincronizan)");
+    ROWS = BASE_DATA.map(r => ({...r}));
+    hideOverlay(); renderAll(); return;
+  }
+  try {
+    setSyncStatus("saving", "Cargando...");
+    const res  = await fetch(API_URL + "?action=getAll");
+    const data = await res.json();
+    if (!data.length) {
+      ROWS = BASE_DATA.map(r => ({...r}));
+      setSyncStatus("error", "Sheet vacía — toca ⬆ Cargar datos iniciales");
+    } else {
+      ROWS = data;
+      setSyncStatus("ok", "Sincronizado · " + new Date().toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"}));
+    }
+  } catch(e) {
+    setSyncStatus("error", "Error de conexión — modo local");
+    ROWS = BASE_DATA.map(r => ({...r}));
+  }
+  hideOverlay();
+  renderAll();
+}
+
+async function saveRow(obs, fields) {
+  if (API_URL === "PEGAR_URL_AQUI") return;
+  setSyncStatus("saving", "Guardando...");
+  try {
+    await fetch(API_URL, {
+      method:"POST",
+      body: JSON.stringify({ action:"update", obs, ...fields })
+    });
+    setSyncStatus("ok", "Guardado · " + new Date().toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"}));
+  } catch(e) {
+    setSyncStatus("error", "Error al guardar");
+  }
+}
+
+async function initData() {
+  if (API_URL === "PEGAR_URL_AQUI") { alert("Primero configura la API_URL en el código."); return; }
+  if (!confirm("¿Cargar los 65 registros base a Google Sheets?\nHacer solo UNA VEZ.")) return;
+  document.getElementById("loadingText").textContent = "Cargando datos iniciales...";
+  document.getElementById("overlay").classList.remove("hidden");
+  try {
+    await fetch(API_URL, {
+      method:"POST",
+      body: JSON.stringify({ action:"init", rows: BASE_DATA })
+    });
+    await loadFromSheet();
+  } catch(e) {
+    setSyncStatus("error", "Error al inicializar");
+    hideOverlay();
+  }
+}
+
+function renderAll() {
+  renderGroupSummary();
+  renderTable();
+  updateStats();
+}
 
 function renderTable(filterClass) {
   const tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
-  DATA.forEach((row, idx) => {
+  ROWS.forEach((row, idx) => {
     const gclass = "grupo-" + row.grupo;
-    const dclass = "dif-" + difs[idx];
-    const show = !filterClass || filterClass === "all" || gclass === filterClass || dclass === filterClass;
+    const dclass = "dif-" + row.dificultad;
+    const show = !filterClass || filterClass==="all" || gclass===filterClass || dclass===filterClass;
     const tr = document.createElement("tr");
     if (!show) tr.classList.add("hidden");
     tr.dataset.grupo = gclass;
-    tr.dataset.dif = dclass;
+    tr.dataset.dif   = dclass;
     tr.innerHTML = `
       <td class="nc-num">${String(idx+1).padStart(2,"0")}</td>
       <td class="nc-num">NC-${row.obs}</td>
       <td class="nc-desc">${row.desc}</td>
-      <td><span class="tag grupo-${row.grupo}">${GRUPOS[row.grupo].label}</span></td>
+      <td><span class="tag grupo-${row.grupo}">${GRUPOS[row.grupo]?.label||row.grupo}</span></td>
       <td>
-        <select class="editable-select dif-sel-${difs[idx]}" data-idx="${idx}" onchange="changeDif(this)">
-          <option value="1" ${difs[idx]==1?'selected':''}>1 · Fácil rápido</option>
-          <option value="2" ${difs[idx]==2?'selected':''}>2 · Fácil largo</option>
-          <option value="3" ${difs[idx]==3?'selected':''}>3 · Difícil</option>
+        <select class="editable-select dif-sel-${row.dificultad}" data-idx="${idx}" onchange="changeDif(this)">
+          <option value="1" ${row.dificultad=="1"?"selected":""}>1 · Fácil rápido</option>
+          <option value="2" ${row.dificultad=="2"?"selected":""}>2 · Fácil largo</option>
+          <option value="3" ${row.dificultad=="3"?"selected":""}>3 · Difícil</option>
         </select>
       </td>
       <td class="piso-tag">${row.zona}</td>
+      <td><input class="editable-input" type="text" value="${row.responsable||''}" data-idx="${idx}" onchange="changeResp(this)" placeholder="Responsable..."/></td>
+      <td><input class="date-input" type="date" value="${row.fecha||''}" data-idx="${idx}" onchange="changeFecha(this)"/></td>
       <td>
-        <input class="editable-input" type="text" value="${resps[idx]}" data-idx="${idx}"
-          oninput="changeResp(this)" placeholder="Responsable..." />
-      </td>
-      <td>
-        <input class="date-input" type="date" value="${fechas[idx]}" data-idx="${idx}"
-          onchange="changeFecha(this)" />
-      </td>
-      <td>
-        <select class="editable-select ${estados[idx]}" data-idx="${idx}" onchange="changeStatus(this)">
-          <option value="pendiente"  ${estados[idx]==='pendiente'  ?'selected':''}>Pendiente</option>
-          <option value="en-proceso" ${estados[idx]==='en-proceso' ?'selected':''}>En proceso</option>
-          <option value="levantado"  ${estados[idx]==='levantado'  ?'selected':''}>Levantado ✓</option>
+        <select class="editable-select ${row.estado||'pendiente'}" data-idx="${idx}" onchange="changeStatus(this)">
+          <option value="pendiente"  ${(row.estado||'')==='pendiente' ?'selected':''}>Pendiente</option>
+          <option value="en-proceso" ${row.estado==='en-proceso'?'selected':''}>En proceso</option>
+          <option value="levantado"  ${row.estado==='levantado' ?'selected':''}>Levantado ✓</option>
         </select>
       </td>`;
     tbody.appendChild(tr);
+    colorFecha(tr.querySelector(".date-input"));
   });
-  updateStats();
-}
-
-function changeDif(sel) {
-  const idx = parseInt(sel.dataset.idx);
-  difs[idx] = parseInt(sel.value);
-  sel.className = "editable-select dif-sel-" + sel.value;
-  // update row data-dif for filters
-  sel.closest("tr").dataset.dif = "dif-" + sel.value;
-  updateStats();
-}
-
-function changeResp(inp) {
-  resps[inp.dataset.idx] = inp.value;
-}
-
-function changeFecha(inp) {
-  fechas[inp.dataset.idx] = inp.value;
-  colorFecha(inp);
-}
-
-function colorFecha(inp) {
-  if (!inp.value) { inp.className = "date-input"; return; }
-  const today = new Date(); today.setHours(0,0,0,0);
-  const d = new Date(inp.value + "T00:00:00");
-  const diff = (d - today) / 86400000;
-  inp.classList.remove("vencida","proxima");
-  if (diff < 0) inp.classList.add("vencida");
-  else if (diff <= 7) inp.classList.add("proxima");
-}
-
-function changeStatus(sel) {
-  const idx = sel.dataset.idx;
-  estados[idx] = sel.value;
-  sel.className = "editable-select " + sel.value;
-  updateStats();
-}
-
-function updateStats() {
-  const counts = { d1:0, d2:0, d3:0, doc:0, lev:0 };
-  DATA.forEach((r,i) => {
-    if (r.grupo === "DOC") counts.doc++;
-    else if (difs[i]===1) counts.d1++;
-    else if (difs[i]===2) counts.d2++;
-    else if (difs[i]===3) counts.d3++;
-    if (estados[i]==="levantado") counts.lev++;
-  });
-  const vals = document.querySelectorAll("#stats .val");
-  vals[0].textContent = counts.d1;
-  vals[1].textContent = counts.d2;
-  vals[2].textContent = counts.d3;
-  vals[3].textContent = counts.doc;
-  vals[4].textContent = counts.lev;
 }
 
 function renderGroupSummary() {
   const cont = document.getElementById("groupSummary");
+  cont.innerHTML = "";
   const counts = {};
-  Object.keys(GRUPOS).forEach(k => counts[k] = 0);
-  DATA.forEach(r => counts[r.grupo]++);
+  Object.keys(GRUPOS).forEach(k => counts[k]=0);
+  ROWS.forEach(r => { if(counts[r.grupo]!==undefined) counts[r.grupo]++; });
   Object.entries(GRUPOS).forEach(([k,v]) => {
     const div = document.createElement("div");
     div.className = "gs-card";
@@ -635,37 +378,100 @@ function renderGroupSummary() {
       <div class="gs-count" style="color:${v.color}">${counts[k]}</div>
       <div class="gs-label">no conformidades</div>`;
     div.addEventListener("click", () => {
-      const btns = document.querySelectorAll(".btn-filter");
-      btns.forEach(b => b.classList.remove("active"));
-      const target = "grupo-" + k;
-      applyFilter(target);
-      document.querySelectorAll(".gs-card").forEach(c => c.classList.remove("active-filter"));
+      document.querySelectorAll(".btn-filter").forEach(b=>b.classList.remove("active"));
+      document.querySelectorAll(".gs-card").forEach(c=>c.classList.remove("active-filter"));
       div.classList.add("active-filter");
+      applyFilter("grupo-"+k);
     });
     cont.appendChild(div);
   });
 }
 
+function updateStats() {
+  let d1=0,d2=0,d3=0,doc=0,lev=0;
+  ROWS.forEach(r => {
+    if (r.grupo==="DOC") doc++;
+    else if (r.dificultad=="1") d1++;
+    else if (r.dificultad=="2") d2++;
+    else if (r.dificultad=="3") d3++;
+    if (r.estado==="levantado") lev++;
+  });
+  document.getElementById("s1").textContent=d1;
+  document.getElementById("s2").textContent=d2;
+  document.getElementById("s3").textContent=d3;
+  document.getElementById("s4").textContent=doc;
+  document.getElementById("s5").textContent=lev;
+}
+
+function changeDif(sel) {
+  const idx=parseInt(sel.dataset.idx);
+  ROWS[idx].dificultad=sel.value;
+  sel.className="editable-select dif-sel-"+sel.value;
+  sel.closest("tr").dataset.dif="dif-"+sel.value;
+  updateStats();
+  queueSave(idx,{dificultad:sel.value});
+}
+
+function changeResp(inp) {
+  const idx=parseInt(inp.dataset.idx);
+  ROWS[idx].responsable=inp.value;
+  queueSave(idx,{responsable:inp.value});
+}
+
+function changeFecha(inp) {
+  const idx=parseInt(inp.dataset.idx);
+  ROWS[idx].fecha=inp.value;
+  colorFecha(inp);
+  queueSave(idx,{fecha:inp.value});
+}
+
+function changeStatus(sel) {
+  const idx=parseInt(sel.dataset.idx);
+  ROWS[idx].estado=sel.value;
+  sel.className="editable-select "+sel.value;
+  updateStats();
+  queueSave(idx,{estado:sel.value});
+}
+
+function queueSave(idx, fields) {
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>saveRow(ROWS[idx].obs,fields), 800);
+}
+
+function colorFecha(inp) {
+  if (!inp.value) { inp.className="date-input"; return; }
+  const today=new Date(); today.setHours(0,0,0,0);
+  const d=new Date(inp.value+"T00:00:00");
+  const diff=(d-today)/86400000;
+  inp.classList.remove("vencida","proxima");
+  if (diff<0) inp.classList.add("vencida");
+  else if (diff<=7) inp.classList.add("proxima");
+}
+
 function applyFilter(f) {
-  document.querySelectorAll("#tbody tr").forEach(tr => {
-    if (f === "all") { tr.classList.remove("hidden"); return; }
-    const match = tr.dataset.grupo === f || tr.dataset.dif === f;
-    tr.classList.toggle("hidden", !match);
+  document.querySelectorAll("#tbody tr").forEach(tr=>{
+    if(f==="all"){tr.classList.remove("hidden");return;}
+    tr.classList.toggle("hidden", tr.dataset.grupo!==f && tr.dataset.dif!==f);
   });
 }
 
-// Filter buttons
-document.querySelectorAll(".btn-filter").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".btn-filter").forEach(b => b.classList.remove("active"));
+function hideOverlay() {
+  document.getElementById("overlay").classList.add("hidden");
+}
+
+document.querySelectorAll(".btn-filter").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".btn-filter").forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
-    document.querySelectorAll(".gs-card").forEach(c => c.classList.remove("active-filter"));
+    document.querySelectorAll(".gs-card").forEach(c=>c.classList.remove("active-filter"));
     applyFilter(btn.dataset.filter);
   });
 });
 
-renderGroupSummary();
-renderTable("all");
+// Auto-refresh cada 60 seg para ver cambios de otros usuarios
+setInterval(()=>{ if(API_URL!=="PEGAR_URL_AQUI") loadFromSheet(); }, 60000);
+
+loadFromSheet();
 </script>
 </body>
 </html>
