@@ -189,7 +189,7 @@
 // ══════════════════════════════════════════════════════
 // CONFIGURACIÓN — pegar URL del Apps Script deployment
 // ══════════════════════════════════════════════════════
-const API_URL = "https://script.google.com/macros/s/AKfycbzqAdMEmvDU-nURG08UTYY8Xse59uoR9VPsBMCd0EBYB7uI_yJ9p5D3gqXRhBC7bA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwWZveuoI92yswFF2S5UsEAkH7HSiICc9U2oFwMfsuwSIjhy7WgH_uHzPDDzD186Wk/exec";
 
 const BASE_DATA = [
   { obs:16,  desc:"Contenedores sin señalización ni letrero de identificación.", grupo:"SEG", dificultad:"1", zona:"General", responsable:"Magaly / Mario", fecha:"", estado:"pendiente" },
@@ -277,6 +277,23 @@ function setSyncStatus(state, text) {
   document.getElementById("syncText").textContent = text;
 }
 
+function normalizarFecha(val) {
+  if (!val) return "";
+  // Ya está en formato YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(String(val))) return val;
+  // Formato DD/MM/YYYY
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(String(val))) {
+    const [d, m, y] = val.split("/");
+    return `${y}-${m.padStart(2,"0")}-${d.padStart(2,"0")}`;
+  }
+  // Objeto Date de Google Sheets
+  try {
+    const d = new Date(val);
+    if (!isNaN(d)) return d.toISOString().split("T")[0];
+  } catch(e) {}
+  return "";
+}
+
 async function loadFromSheet() {
   if (API_URL === "PEGAR_URL_AQUI") {
     setSyncStatus("error", "Sin API — modo local (los cambios no se sincronizan)");
@@ -291,7 +308,7 @@ async function loadFromSheet() {
       ROWS = BASE_DATA.map(r => ({...r}));
       setSyncStatus("error", "Sheet vacía — toca ⬆ Cargar datos iniciales");
     } else {
-      ROWS = data;
+      ROWS = data.map(r => ({...r, fecha: normalizarFecha(r.fecha)}));
       setSyncStatus("ok", "Sincronizado · " + new Date().toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"}));
     }
   } catch(e) {
