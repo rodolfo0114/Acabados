@@ -101,14 +101,7 @@
   .dif-3 { background: rgba(239,68,68,.12);  color: var(--d3); border: 1px solid rgba(239,68,68,.25); }
   .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: inline-block; }
 
-  .sort-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-  .sort-label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-right: 4px; font-family: 'IBM Plex Mono', monospace; }
-  .btn-sort { background: var(--surface); border: 1px solid var(--border); color: var(--muted); border-radius: 4px; padding: 4px 14px; font-size: 11px; font-family: 'IBM Plex Mono', monospace; cursor: pointer; transition: all .15s; }
-  .btn-sort:hover { border-color: var(--accent); color: var(--text); }
-  .btn-sort.active { background: #1a1e2e; border-color: var(--accent); color: var(--accent); }
-
-  .group-header { background: #1a1e2e; }
-  .group-header td { padding: 6px 14px; font-size: 10px; font-family: 'IBM Plex Mono', monospace; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+  .loading-overlay { position: fixed; inset: 0; background: rgba(13,15,20,.9); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; z-index: 100; }
   .loading-overlay.hidden { display: none; }
   .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -133,7 +126,7 @@
     <div class="sync-dot" id="syncDot"></div>
     <span id="syncText">Conectando...</span>
   </div>
-
+  <button class="btn-init" onclick="initData()">⬆ Cargar datos iniciales</button>
 </div>
 
 <div class="stats">
@@ -146,12 +139,6 @@
 
 <div class="section-title">Grupos de problema</div>
 <div class="group-summary" id="groupSummary"></div>
-
-<div class="sort-bar">
-  <span class="sort-label">Ordenar:</span>
-  <button class="btn-sort active" data-sort="nc" onclick="setSort(this)">Por N° NC</button>
-  <button class="btn-sort" data-sort="grupo" onclick="setSort(this)">Por Grupo</button>
-</div>
 
 <div class="filters">
   <span class="filter-label">Filtrar:</span>
@@ -189,7 +176,7 @@
 // ══════════════════════════════════════════════════════
 // CONFIGURACIÓN — pegar URL del Apps Script deployment
 // ══════════════════════════════════════════════════════
-const API_URL = "https://script.google.com/macros/s/AKfycbwWZveuoI92yswFF2S5UsEAkH7HSiICc9U2oFwMfsuwSIjhy7WgH_uHzPDDzD186Wk/exec";
+const API_URL = "PEGAR_URL_AQUI";
 
 const BASE_DATA = [
   { obs:16,  desc:"Contenedores sin señalización ni letrero de identificación.", grupo:"SEG", dificultad:"1", zona:"General", responsable:"Magaly / Mario", fecha:"", estado:"pendiente" },
@@ -277,23 +264,6 @@ function setSyncStatus(state, text) {
   document.getElementById("syncText").textContent = text;
 }
 
-function normalizarFecha(val) {
-  if (!val) return "";
-  // Ya está en formato YYYY-MM-DD
-  if (/^\d{4}-\d{2}-\d{2}$/.test(String(val))) return val;
-  // Formato DD/MM/YYYY
-  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(String(val))) {
-    const [d, m, y] = val.split("/");
-    return `${y}-${m.padStart(2,"0")}-${d.padStart(2,"0")}`;
-  }
-  // Objeto Date de Google Sheets
-  try {
-    const d = new Date(val);
-    if (!isNaN(d)) return d.toISOString().split("T")[0];
-  } catch(e) {}
-  return "";
-}
-
 async function loadFromSheet() {
   if (API_URL === "PEGAR_URL_AQUI") {
     setSyncStatus("error", "Sin API — modo local (los cambios no se sincronizan)");
@@ -308,7 +278,7 @@ async function loadFromSheet() {
       ROWS = BASE_DATA.map(r => ({...r}));
       setSyncStatus("error", "Sheet vacía — toca ⬆ Cargar datos iniciales");
     } else {
-      ROWS = data.map(r => ({...r, fecha: normalizarFecha(r.fecha)}));
+      ROWS = data;
       setSyncStatus("ok", "Sincronizado · " + new Date().toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"}));
     }
   } catch(e) {
@@ -323,8 +293,10 @@ async function saveRow(obs, fields) {
   if (API_URL === "PEGAR_URL_AQUI") return;
   setSyncStatus("saving", "Guardando...");
   try {
-    const params = new URLSearchParams({ action:"update", obs, ...fields });
-    await fetch(API_URL + "?" + params.toString());
+    await fetch(API_URL, {
+      method:"POST",
+      body: JSON.stringify({ action:"update", obs, ...fields })
+    });
     setSyncStatus("ok", "Guardado · " + new Date().toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"}));
   } catch(e) {
     setSyncStatus("error", "Error al guardar");
@@ -337,8 +309,10 @@ async function initData() {
   document.getElementById("loadingText").textContent = "Cargando datos iniciales...";
   document.getElementById("overlay").classList.remove("hidden");
   try {
-    const params = new URLSearchParams({ action:"init", rows: JSON.stringify(BASE_DATA) });
-    await fetch(API_URL + "?" + params.toString());
+    await fetch(API_URL, {
+      method:"POST",
+      body: JSON.stringify({ action:"init", rows: BASE_DATA })
+    });
     await loadFromSheet();
   } catch(e) {
     setSyncStatus("error", "Error al inicializar");
@@ -352,76 +326,42 @@ function renderAll() {
   updateStats();
 }
 
-let currentSort = "nc";
-let currentFilter = "all";
-
-function setSort(btn) {
-  document.querySelectorAll(".btn-sort").forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
-  currentSort = btn.dataset.sort;
-  renderTable(currentFilter);
-}
-
 function renderTable(filterClass) {
-  if (filterClass !== undefined) currentFilter = filterClass;
   const tbody = document.getElementById("tbody");
   tbody.innerHTML = "";
-
-  // Ordenar copia de ROWS
-  let sorted = ROWS.map((r, i) => ({...r, _idx: i}));
-  if (currentSort === "nc") {
-    sorted.sort((a, b) => Number(a.obs) - Number(b.obs));
-    sorted.forEach((row, pos) => appendRow(tbody, row, row._idx, pos + 1));
-  } else {
-    // Agrupar por grupo en orden definido
-    const orden = ["SEG","ARQ","IIE","IIMM","DA","DOC"];
-    orden.forEach(grupo => {
-      const filas = sorted.filter(r => r.grupo === grupo);
-      if (!filas.length) return;
-      // Cabecera de grupo
-      const th = document.createElement("tr");
-      th.className = "group-header";
-      th.innerHTML = `<td colspan="9" style="color:${GRUPOS[grupo].color}">${GRUPOS[grupo].label} — ${filas.length} NC</td>`;
-      const show = currentFilter==="all" || currentFilter==="grupo-"+grupo;
-      if (!show) th.classList.add("hidden");
-      tbody.appendChild(th);
-      filas.forEach((row, pos) => appendRow(tbody, row, row._idx, pos + 1));
-    });
-  }
-}
-
-function appendRow(tbody, row, idx, pos) {
-  const gclass = "grupo-" + row.grupo;
-  const dclass = "dif-" + row.dificultad;
-  const show = currentFilter==="all" || gclass===currentFilter || dclass===currentFilter;
-  const tr = document.createElement("tr");
-  if (!show) tr.classList.add("hidden");
-  tr.dataset.grupo = gclass;
-  tr.dataset.dif   = dclass;
-  tr.innerHTML = `
-    <td class="nc-num">${String(pos).padStart(2,"0")}</td>
-    <td class="nc-num">NC-${row.obs}</td>
-    <td class="nc-desc">${row.desc}</td>
-    <td><span class="tag grupo-${row.grupo}">${GRUPOS[row.grupo]?.label||row.grupo}</span></td>
-    <td>
-      <select class="editable-select dif-sel-${row.dificultad}" data-idx="${idx}" onchange="changeDif(this)">
-        <option value="1" ${row.dificultad=="1"?"selected":""}>1 · Fácil rápido</option>
-        <option value="2" ${row.dificultad=="2"?"selected":""}>2 · Fácil largo</option>
-        <option value="3" ${row.dificultad=="3"?"selected":""}>3 · Difícil</option>
-      </select>
-    </td>
-    <td class="piso-tag">${row.zona}</td>
-    <td><input class="editable-input" type="text" value="${row.responsable||''}" data-idx="${idx}" onchange="changeResp(this)" placeholder="Responsable..."/></td>
-    <td><input class="date-input" type="date" value="${row.fecha||''}" data-idx="${idx}" onchange="changeFecha(this)"/></td>
-    <td>
-      <select class="editable-select ${row.estado||'pendiente'}" data-idx="${idx}" onchange="changeStatus(this)">
-        <option value="pendiente"  ${(row.estado||'')==='pendiente'?'selected':''}>Pendiente</option>
-        <option value="en-proceso" ${row.estado==='en-proceso'?'selected':''}>En proceso</option>
-        <option value="levantado"  ${row.estado==='levantado'?'selected':''}>Levantado ✓</option>
-      </select>
-    </td>`;
-  tbody.appendChild(tr);
-  colorFecha(tr.querySelector(".date-input"));
+  ROWS.forEach((row, idx) => {
+    const gclass = "grupo-" + row.grupo;
+    const dclass = "dif-" + row.dificultad;
+    const show = !filterClass || filterClass==="all" || gclass===filterClass || dclass===filterClass;
+    const tr = document.createElement("tr");
+    if (!show) tr.classList.add("hidden");
+    tr.dataset.grupo = gclass;
+    tr.dataset.dif   = dclass;
+    tr.innerHTML = `
+      <td class="nc-num">${String(idx+1).padStart(2,"0")}</td>
+      <td class="nc-num">NC-${row.obs}</td>
+      <td class="nc-desc">${row.desc}</td>
+      <td><span class="tag grupo-${row.grupo}">${GRUPOS[row.grupo]?.label||row.grupo}</span></td>
+      <td>
+        <select class="editable-select dif-sel-${row.dificultad}" data-idx="${idx}" onchange="changeDif(this)">
+          <option value="1" ${row.dificultad=="1"?"selected":""}>1 · Fácil rápido</option>
+          <option value="2" ${row.dificultad=="2"?"selected":""}>2 · Fácil largo</option>
+          <option value="3" ${row.dificultad=="3"?"selected":""}>3 · Difícil</option>
+        </select>
+      </td>
+      <td class="piso-tag">${row.zona}</td>
+      <td><input class="editable-input" type="text" value="${row.responsable||''}" data-idx="${idx}" onchange="changeResp(this)" placeholder="Responsable..."/></td>
+      <td><input class="date-input" type="date" value="${row.fecha||''}" data-idx="${idx}" onchange="changeFecha(this)"/></td>
+      <td>
+        <select class="editable-select ${row.estado||'pendiente'}" data-idx="${idx}" onchange="changeStatus(this)">
+          <option value="pendiente"  ${(row.estado||'')==='pendiente' ?'selected':''}>Pendiente</option>
+          <option value="en-proceso" ${row.estado==='en-proceso'?'selected':''}>En proceso</option>
+          <option value="levantado"  ${row.estado==='levantado' ?'selected':''}>Levantado ✓</option>
+        </select>
+      </td>`;
+    tbody.appendChild(tr);
+    colorFecha(tr.querySelector(".date-input"));
+  });
 }
 
 function renderGroupSummary() {
@@ -509,8 +449,10 @@ function colorFecha(inp) {
 }
 
 function applyFilter(f) {
-  currentFilter = f;
-  renderTable(f);
+  document.querySelectorAll("#tbody tr").forEach(tr=>{
+    if(f==="all"){tr.classList.remove("hidden");return;}
+    tr.classList.toggle("hidden", tr.dataset.grupo!==f && tr.dataset.dif!==f);
+  });
 }
 
 function hideOverlay() {
