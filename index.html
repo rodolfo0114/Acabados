@@ -494,6 +494,8 @@ function renderGroupSummary() {
       document.querySelectorAll(".btn-filter").forEach(b=>b.classList.remove("active"));
       document.querySelectorAll(".gs-card").forEach(c=>c.classList.remove("active-filter"));
       div.classList.add("active-filter");
+      estadoFilter = null;
+      document.querySelectorAll(".prog-card").forEach(c=>c.classList.remove("active-estado"));
       applyFilter("grupo-"+k);
     });
     cont.appendChild(div);
@@ -603,6 +605,11 @@ document.querySelectorAll(".btn-filter").forEach(btn=>{
     document.querySelectorAll(".btn-filter").forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
     document.querySelectorAll(".gs-card").forEach(c=>c.classList.remove("active-filter"));
+    // Si toca "Todos", limpia también el filtro de estado
+    if (btn.dataset.filter === "all") {
+      estadoFilter = null;
+      document.querySelectorAll(".prog-card").forEach(c=>c.classList.remove("active-estado"));
+    }
     applyFilter(btn.dataset.filter);
   });
 });
